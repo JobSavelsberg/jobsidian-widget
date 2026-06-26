@@ -16,6 +16,8 @@ class QuickCaptureActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         supportRequestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_quick_capture)
+        window.setSoftInputMode(
+            android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
 
         vaultManager = VaultManager(this)
 
@@ -84,6 +86,14 @@ class QuickCaptureActivity : AppCompatActivity() {
             intent.getStringExtra(android.content.Intent.EXTRA_TEXT)?.let {
                 captureInput.setText(it)
             }
+        }
+
+        // Auto-focus the input and open the keyboard immediately
+        captureInput.requestFocus()
+        captureInput.post {
+            val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
+                as android.view.inputmethod.InputMethodManager
+            imm.showSoftInput(captureInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
         }
     }
 }
