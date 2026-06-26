@@ -203,7 +203,7 @@ class VaultManager(private val context: Context, private val widgetId: Int = -1)
         set(value) = prefs.edit().putBoolean(wk(KEY_TAP_CHECKBOX_ONLY), value).apply()
 
     var addToTop: Boolean
-        get() = prefs.getBoolean(wk(KEY_ADD_TO_TOP), false)
+        get() = prefs.getBoolean(wk(KEY_ADD_TO_TOP), true)
         set(value) = prefs.edit().putBoolean(wk(KEY_ADD_TO_TOP), value).apply()
 
     var showAddToTop: Boolean
