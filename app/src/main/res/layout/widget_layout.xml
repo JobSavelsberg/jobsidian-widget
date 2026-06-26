@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="6dp">
 
     <!-- Header -->
     <LinearLayout
@@ -13,7 +13,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingBottom="8dp">
+        android:paddingHorizontal="4dp"
+        android:paddingBottom="2dp">
 
         <TextView
             android:id="@+id/widget_date"
@@ -46,12 +47,13 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="12dp"
+        android:paddingHorizontal="1dp"
+        android:paddingVertical="4dp"
         android:text="@string/no_vault_selected"
+        android:lineSpacingExtra="1dp"
         android:textColor="@color/obsidian_text_secondary"
         android:textSize="13sp"
-        android:lineSpacingExtra="3dp"
-        android:maxLines="10"
+        android:maxLines="20"
         android:ellipsize="end"
         android:visibility="gone" />
 
@@ -74,7 +76,7 @@
         android:id="@+id/widget_button_bar"
         android:layout_width="match_parent"
         android:layout_height="32dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="2dp"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
