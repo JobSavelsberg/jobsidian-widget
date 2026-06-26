@@ -123,26 +123,27 @@ class ObsidianWidgetProvider : AppWidgetProvider() {
         val views = RemoteViews(context.packageName, R.layout.widget_layout)
         val vaultManager = VaultManager(context, appWidgetId)
 
-        // Set title based on mode
-        val noteCount = if (vaultManager.noteMode == VaultManager.NoteMode.PINNED) vaultManager.getPinnedNoteCount() else 0
+        // Set title
         views.setTextViewText(R.id.widget_date, vaultManager.getWidgetTitle())
 
-        // Check if note has checklist items
-        val allItems = vaultManager.parseChecklist()
-        val hasChecklist = allItems.any { !it.isPlainText }
-
-        // Show TODO count if enabled
-        if (vaultManager.showTodoCount && hasChecklist) {
-            val unchecked = allItems.count { !it.isPlainText && !it.isChecked }
-            val total = allItems.count { !it.isPlainText }
-            views.setTextViewText(R.id.widget_todo_count, "$unchecked of $total remaining")
-            views.setViewVisibility(R.id.widget_todo_count, View.VISIBLE)
+        // Cycle note arrow (visible only for multi-note)
+        val noteCount = if (vaultManager.noteMode == VaultManager.NoteMode.PINNED) vaultManager.getPinnedNoteCount() else 0
+        if (noteCount > 1) {
+            views.setViewVisibility(R.id.widget_cycle_note, View.VISIBLE)
+            views.setOnClickPendingIntent(
+                R.id.widget_cycle_note,
+                createActionIntent(context, ACTION_NAV_RIGHT, appWidgetId)
+            )
         } else {
-            views.setViewVisibility(R.id.widget_todo_count, View.GONE)
+            views.setViewVisibility(R.id.widget_cycle_note, View.GONE)
         }
 
-        if (hasChecklist) {
-            // Show interactive checklist ListView
+        // Check if note has any content to render in the scrollable list
+        val allItems = vaultManager.parseChecklist()
+        val hasContent = allItems.isNotEmpty()
+
+        if (hasContent) {
+            // Show interactive checklist ListView (handles both checklist and plain-text lines)
             views.setViewVisibility(R.id.widget_checklist, View.VISIBLE)
             views.setViewVisibility(R.id.widget_note_preview, View.GONE)
 
@@ -184,46 +185,16 @@ class ObsidianWidgetProvider : AppWidgetProvider() {
             }
         }
 
+        // Tapping the note preview opens it in Obsidian
+        views.setOnClickPendingIntent(
+            R.id.widget_note_preview,
+            createActionIntent(context, ACTION_OPEN, appWidgetId)
+        )
+
         // Add to note button
         views.setOnClickPendingIntent(
             R.id.widget_add,
             createActionIntent(context, ACTION_ADD, appWidgetId)
-        )
-
-        // Title click always opens note in Obsidian
-        views.setOnClickPendingIntent(
-            R.id.widget_date,
-            createActionIntent(context, ACTION_OPEN, appWidgetId)
-        )
-
-        // Cycle note arrow (visible only for multi-note)
-        if (noteCount > 1) {
-            views.setViewVisibility(R.id.widget_cycle_note, View.VISIBLE)
-            views.setOnClickPendingIntent(
-                R.id.widget_cycle_note,
-                createActionIntent(context, ACTION_NAV_RIGHT, appWidgetId)
-            )
-        } else {
-            views.setViewVisibility(R.id.widget_cycle_note, View.GONE)
-        }
-
-        // Settings button opens widget config
-        val configIntent = Intent(context, WidgetConfigActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-        }
-        views.setOnClickPendingIntent(
-            R.id.widget_settings,
-            PendingIntent.getActivity(
-                context, appWidgetId + 10000, configIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        )
-
-        // Refresh button
-        views.setOnClickPendingIntent(
-            R.id.widget_refresh,
-            createActionIntent(context, ACTION_REFRESH, appWidgetId)
         )
 
         // Quick capture button
@@ -254,11 +225,6 @@ class ObsidianWidgetProvider : AppWidgetProvider() {
             if (isDark) R.drawable.widget_background else R.drawable.widget_background_light)
         views.setTextColor(R.id.widget_date, colors.text)
         views.setTextColor(R.id.widget_note_preview, colors.textSecondary)
-        views.setTextColor(R.id.widget_todo_count, colors.textSecondary)
-
-        // Tint header icons to match theme
-        views.setInt(R.id.widget_refresh, "setColorFilter", colors.text)
-        views.setInt(R.id.widget_settings, "setColorFilter", colors.text)
         views.setInt(R.id.widget_cycle_note, "setColorFilter", colors.text)
 
         // Tint accent-colored buttons (preserves rounded drawable shape)
