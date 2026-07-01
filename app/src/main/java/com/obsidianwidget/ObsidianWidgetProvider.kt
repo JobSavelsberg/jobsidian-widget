@@ -126,6 +126,12 @@ class ObsidianWidgetProvider : AppWidgetProvider() {
         // Set title
         views.setTextViewText(R.id.widget_date, vaultManager.getWidgetTitle())
 
+        // Tapping the title opens the note in Obsidian
+        views.setOnClickPendingIntent(
+            R.id.widget_date,
+            createActionIntent(context, ACTION_OPEN, appWidgetId)
+        )
+
         // Cycle note arrow (visible only for multi-note)
         val noteCount = if (vaultManager.noteMode == VaultManager.NoteMode.PINNED) vaultManager.getPinnedNoteCount() else 0
         if (noteCount > 1) {
